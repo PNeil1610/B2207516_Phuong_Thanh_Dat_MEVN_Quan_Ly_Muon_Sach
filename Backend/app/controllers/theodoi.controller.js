@@ -80,7 +80,7 @@ exports.update = async (req, res, next) => {
     try {
         const theodoiService = new TheodoiService(MongoDB.client);
         const document = await theodoiService.update(req.params.id, req.body);
-        if (document) {
+        if (!document) {
             return next(new ApiError(404, 'Lịch sử mượn không tồn tại'));
         }
         return res.send({message: 'Sổ mượn được cập nhật thành công'});	
@@ -119,3 +119,122 @@ exports.deleteAll = async (req, res, next) => {
         );
     }
 }
+
+exports.muonSach = async (req, res, next) => {
+    // console.log(req.body)
+    const { docGiaID, maSach } = req.body;
+    
+    if (!docGiaID || !maSach) {
+        return next(new ApiError(400, 'Mã độc giả và mã sách không được bỏ trống'));
+    }
+    try {
+        const theodoiService = new TheodoiService(MongoDB.client);
+        
+        // Kiểm tra số lượng sách độc giả đã mượn (chưa trả)
+        const dsMuon = await theodoiService.find({ docGiaID, trangthai: 'Chờ duyệt' });
+
+        if (dsMuon.length >= 2) {
+            return next(new ApiError(400, 'Độc giả chỉ được mượn tối đa 2 sách cùng lúc'));
+        }
+
+        // Thêm vào danh sách chờ duyệt
+        const requestMuon = {
+            maDG: docGiaID,
+            maSach,
+            ngaymuon: new Date().toISOString(),
+            trangthai: 'Chờ duyệt'
+        };
+
+        const document = await theodoiService.create(requestMuon);
+        return res.send({ message: 'Yêu cầu mượn sách đã được gửi', data: document });
+        
+    } catch (error) {
+        return next(new ApiError(500, 'Có lỗi xảy ra khi mượn sách'));
+    }
+};
+
+exports.duyetMuonSach = async (req, res, next) => {
+    const { id } = req.params;
+    const sachService = require('../services/sach.service'); // Import service quản lý sách
+
+    try {
+        const theodoiService = new TheodoiService(MongoDB.client);
+        const sachSvc = new sachService(MongoDB.client);
+
+        // Lấy thông tin mượn sách
+        const muonSach = await theodoiService.findById(id);
+        if (!muonSach) {
+            return next(new ApiError(404, 'Không tìm thấy yêu cầu mượn sách'));
+        }
+
+        if (muonSach.trangthai !== 'Chờ duyệt') {
+            return next(new ApiError(400, 'Yêu cầu này đã được xử lý'));
+        }
+
+        // Kiểm tra số lượng sách còn lại
+        const sach = await sachSvc.findById(muonSach.maSach);
+        if (!sach) {
+            return next(new ApiError(404, 'Sách không tồn tại'));
+        }
+        if (sach.soquyenSach <= 0) {
+            return next(new ApiError(400, 'Sách này đã hết, không thể mượn'));
+        }
+
+        // Giảm số lượng sách đi 1
+        await sachSvc.update(sach._id, { soquyenSach: sach.soquyenSach - 1 });
+
+        // Cập nhật trạng thái mượn thành "Đã duyệt"
+        const updatedDoc = await theodoiService.update(id, { 
+            trangthai: 'Đã duyệt',
+            ngaymuon: new Date().toISOString()
+        });
+
+        return res.send({ message: 'Yêu cầu mượn sách đã được duyệt', data: updatedDoc });
+
+    } catch (error) {
+        return next(new ApiError(500, 'Có lỗi xảy ra khi duyệt yêu cầu mượn sách'));
+    }
+};
+
+
+exports.xacNhanTraSach = async (req, res, next) => {
+    const { id } = req.params;
+    const ngaytra = new Date().toISOString();
+    const sachService = require('../services/sach.service'); // Import service quản lý sách
+
+    try {
+        const theodoiService = new TheodoiService(MongoDB.client);
+        const sachSvc = new sachService(MongoDB.client);
+
+        // Lấy thông tin mượn sách
+        const muonSach = await theodoiService.findById(id);
+        if (!muonSach) {
+            return next(new ApiError(404, 'Không tìm thấy yêu cầu mượn sách'));
+        }
+
+        if (muonSach.trangthai !== 'Đã duyệt') {
+            return next(new ApiError(400, 'Chỉ có thể xác nhận trả sách cho các yêu cầu đã được duyệt'));
+        }
+
+        // Tăng số lượng sách lên 1 khi sách được trả
+        const sach = await sachSvc.findById(muonSach.maSach);
+        if (sach) {
+            await sachSvc.update(sach._id, { soquyenSach: sach.soquyenSach + 1 });
+        }
+
+        // Cập nhật trạng thái mượn thành "Đã trả"
+        const updatedDoc = await theodoiService.update(id, { 
+            trangthai: 'Đã trả',
+            ngaymuon: muonSach.ngaymuon,
+            ngaytra: ngaytra
+        });
+
+        return res.send({ message: 'Xác nhận trả sách thành công', data: updatedDoc });
+
+    } catch (error) {
+        return next(new ApiError(500, 'Có lỗi xảy ra khi xác nhận trả sách'));
+    }
+};
+
+
+

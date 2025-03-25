@@ -8,6 +8,8 @@ const sachRouter = require('./app/routes/sach.route');
 const theodoiRouter = require('./app/routes/theodoi.route');
 
 
+
+
 const ApiError = require('./app/api-error');
 
 const app = express();
@@ -22,7 +24,7 @@ app.get('/', (req, res) => {
 app.use("/api/docgia", docgiaRouter);
 app.use("/api/nhanvien", nhanvienRouter);
 app.use("/api/nxb", nxbRouter);
-app.use("/api/book", sachRouter);
+app.use("/api/sach", sachRouter);
 app.use("/api/theodoi", theodoiRouter);
 
 
@@ -36,5 +38,6 @@ app.use((err, req, res, next) => {
         message: err.message || 'Internal Server Error',
     });
 });
+
 
 module.exports = app;

@@ -12,10 +12,6 @@ exports.create = async (req, res, next) => {
         return next(new ApiError(400, 'Chức vụ không được bỏ trống'));
     }
 
-    if (!req.body?._id){
-        return next(new ApiError(400, 'Id không được bỏ trống'));
-    }
-
     try {
         const nhanvienService = new NhanvienService(MongoDB.client);        
         const document = await nhanvienService.create(req.body);
@@ -120,13 +116,23 @@ exports.deleteAll = async (req, res, next) => {
 
 exports.loginNhanVien = async (req, res, next) => {
     try {
-        const { dienthoaiNV, matkhauNV } = req.body;
-        console.log(dienthoaiNV, matkhauNV);
         const nhanvienService = new NhanvienService(MongoDB.client);
+        const { dienthoaiNV, matkhauNV } = req.body;
         const result = await nhanvienService.loginNhanVien(dienthoaiNV, matkhauNV);
-        return res.json({ message: "Đăng nhập thành công", ...result });
+        return res.send(result);
     } catch (error) {
-        console.log(error);
-        next(error);
+        return next(new ApiError(401, error.message || 'Đăng nhập thất bại'));
+    }
+};
+
+exports.registerNhanVien = async (req, res, next) => {
+    try {
+        const nhanvienService = new NhanvienService(MongoDB.client);
+        const result = await nhanvienService.registerNhanVien(
+            req.body    
+        );
+        return res.send(result);
+    } catch (error) {
+        return next(new ApiError(400, error.message || 'Đăng ký nhân viên thất bại'));
     }
 };

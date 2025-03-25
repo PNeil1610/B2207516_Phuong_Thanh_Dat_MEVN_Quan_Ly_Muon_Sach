@@ -14,5 +14,5 @@ router.route('/:id')
     .delete(nhanvien.delete);
 
 router.post("/login", nhanvien.loginNhanVien);
-
+router.post("/register", nhanvien.registerNhanVien);
 module.exports = router;

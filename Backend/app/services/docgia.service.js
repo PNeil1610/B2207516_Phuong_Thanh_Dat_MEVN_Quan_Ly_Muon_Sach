@@ -14,8 +14,8 @@ class DocgiaService {
             gioitinhDG: payload.gioitinhDG,
             ngaysinhDG: payload.ngaysinhDG,
             dienthoaiDG: payload.dienthoaiDG,
-            taikhoanDG: payload._id,
-            matkhauDG: payload.matkhauDG,
+            taikhoanDG: payload.taikhoanDG,
+            matkhauDG: payload.matkhauDG ? await bcrypt.hash(payload.matkhauDG, 10) : undefined,
         };
         Object.keys(docgia).forEach(
             (key) => docgia[key] === undefined && delete docgia[key]
@@ -24,7 +24,6 @@ class DocgiaService {
     }
 
     async create(payload) {
-        
         const docgia = await this.extractDocgiaData(payload);
         
         const result = await this.Docgia.findOneAndUpdate(
@@ -53,49 +52,50 @@ class DocgiaService {
         });
     }
 
+    
+
     async findById(id) {
         try {
-            const docgia = await this.Docgia.findOne({
-                _id: id,
-            });
+            if (!ObjectId.isValid(id)) {
+                throw new Error('ID không hợp lệ');
+            }
+            const docgia = await this.Docgia.findOne({ _id: new ObjectId(id) });
             if (!docgia) {
-                console.error('Không tìm thấy tài liệu độc giả:', id);
-                throw new Error('Không tìm thấy tài liệu độc giả với id');
+                throw new Error(`Không tìm thấy tài liệu độc giả với ID: ${id}`);
             }
             return docgia;
         } catch (error) {
-            console.error('Có lỗi xảy ra khi tìm kiếm độc giả:', error);
+            console.error('Lỗi khi tìm độc giả:', error);
             throw error;
         }
     }
 
-    async update(id, payload) {
-        const filter = {
-            _id: id ? id : null,
-        };    
-        const update = {
-            _id: payload._id,
-            tenDG: payload.tenDG,
-            diachiDG: payload.diachiDG,
-            gioitinhDG: payload.gioitinhDG,
-            ngaysinhDG: payload.ngaysinhDG,
-            dienthoaiDG: payload.dienthoaiDG,
-            matkhauDG: payload.matkhauDG,
-        };
+
+
+async update(id, payload) {
+        const filter = { _id: new ObjectId(id) };
+        const update = await this.extractDocgiaData(payload);
         const result = await this.Docgia.findOneAndUpdate(
             filter,
             { $set: update },
             { returnDocument: 'after' }
         );
-        return result.updatedExisting;
+        return result.value;
     }
 
-    async delete(id) {
-        const result = await this.Docgia.findOneAndDelete({
-            _id: id ? id : null,
-        });
-        return result;
+
+   async delete(id) {
+    if (!ObjectId.isValid(id)) {
+        throw new Error("ID không hợp lệ");
     }
+
+    const result = await this.Docgia.findOneAndDelete({
+        _id: new ObjectId(id),
+    });
+
+    return result;
+}
+
 
     async deleteAll (){
         const result = await this.Docgia.deleteMany({});
@@ -107,9 +107,8 @@ class DocgiaService {
             throw new Error("Số điện thoại và mật khẩu là bắt buộc");
         }
 
-        const docGia = await this.Docgia.findOne({ dienthoaiDG: dienthoaiDG });
-
-        if (!docGia || docGia.matkhauDG !== matkhauDG) {
+        const docGia = await this.Docgia.findOne({ dienthoaiDG });
+        if (!docGia) {
             throw new Error("Số điện thoại hoặc mật khẩu không chính xác");
         }
 
@@ -121,33 +120,49 @@ class DocgiaService {
         return { role: "docgia", user: docGia };
     }
 
-    async registerDocGia(dienthoaiDG, matkhauDG, confirmmatkhauDG) {
-        if (!dienthoaiDG || !matkhauDG || !confirmmatkhauDG) {
-            throw new Error("Số điện thoại, mật khẩu và xác nhận mật khẩu là bắt buộc");
-        }
-
-        if (matkhauDG !== confirmmatkhauDG) {
-            throw new Error("Mật khẩu xác nhận không khớp");
-        }
-
-        const existingDocGia = await this.Docgia.findOne({ dienthoaiDG: dienthoaiDG });
-        if (existingDocGia) {
-            throw new Error("Số điện thoại đã được đăng ký");
-        }
-
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(matkhauDG, saltRounds);
-
-        const newDocGia = {
-            _id: new ObjectId(),
-            tenDG: "Chưa cập nhật",
-            dienthoaiDG: dienthoaiDG,
-            matkhauDG: hashedPassword, // Lưu mật khẩu đã hash vào database
-        };
-
-        await this.Docgia.insertOne(newDocGia);
-        return { message: "Đăng ký thành công", user: newDocGia };
+    async updateSoSachDangMuon(maDG) {
+    if (!ObjectId.isValid(maDG)) {
+        throw new Error("ID độc giả không hợp lệ");
     }
+
+    const count = await this.Theodoi.countDocuments({
+        maDG: new ObjectId(maDG),
+        trangthai: { $in: ["Đã mượn", "Chờ duyệt"] }
+    });
+
+    await this.Docgia.findOneAndUpdate(
+        { _id: new ObjectId(maDG) },
+        { $set: { soSachDangMuon: count } }
+    );
+}
+
+
+    async registerDocGia(tenDG, dienthoaiDG, matkhauDG, confirmmatkhauDG) {
+    if (!tenDG || !dienthoaiDG || !matkhauDG || !confirmmatkhauDG) {
+        throw new Error("Tên độc giả, số điện thoại, mật khẩu và xác nhận mật khẩu là bắt buộc");
+    }
+
+    if (matkhauDG !== confirmmatkhauDG) {
+        throw new Error("Mật khẩu xác nhận không khớp");
+    }
+
+    const existingDocGia = await this.Docgia.findOne({ dienthoaiDG });
+    if (existingDocGia) {
+        throw new Error("Số điện thoại đã được đăng ký");
+    }
+
+    const hashedPassword = await bcrypt.hash(matkhauDG, 10);
+    const newDocGia = {
+        _id: new ObjectId(),
+        tenDG: tenDG || "Chưa cập nhật",
+        dienthoaiDG,
+        matkhauDG: hashedPassword,
+    };
+
+    await this.Docgia.insertOne(newDocGia);
+    return { message: "Đăng ký thành công", user: newDocGia };
+}
+
 };
 
 module.exports = DocgiaService;

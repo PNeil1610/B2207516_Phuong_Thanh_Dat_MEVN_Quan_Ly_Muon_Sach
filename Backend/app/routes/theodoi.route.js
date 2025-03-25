@@ -13,4 +13,7 @@ router.route('/:id')
     .put(theodoi.update)
     .delete(theodoi.delete);
 
+router.post('/muonsach', theodoi.muonSach);
+router.put('/duyet/:id', theodoi.duyetMuonSach);
+router.put('/trasach/:id', theodoi.xacNhanTraSach);
 module.exports = router;

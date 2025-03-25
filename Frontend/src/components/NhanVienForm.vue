@@ -1,0 +1,249 @@
+<style scoped>
+  form {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  .radio-group {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+  }
+
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .radio-group input {
+    width: auto;
+    margin: 0;
+    accent-color: #007bff;
+  }
+
+  .radio-group label:hover {
+    background-color: #f0f8ff;
+    border-color: #007bff;
+  }
+
+  .radio-group input:checked + label {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .btn {
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 120px;
+    text-align: center;
+  }
+
+  .btn-success {
+    background-color: #28a745;
+    border: none;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background-color: #218838;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+</style>
+
+<template>
+  <form @submit.prevent="SubmitForm">
+    <div class="form-group">
+      <label for="tenNV">Họ tên nhân viên:</label>
+      <input
+        id="tenNV"
+        type="text"
+        class="form-control"
+        v-model="nhanvienLocal.tenNV"
+        placeholder="Nhập họ tên nhân viên"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="dienthoaiNV">Số điện thoại:</label>
+      <input
+        id="dienthoaiNV"
+        type="text"
+        class="form-control"
+        v-model="nhanvienLocal.dienthoaiNV"
+        placeholder="Nhập số điện thoại"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="matkhauNV">Mật khẩu:</label>
+      <input
+        id="matkhauNV"
+        type="password"
+        class="form-control"
+        v-model="nhanvienLocal.matkhauNV"
+        placeholder="Nhập mật khẩu"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="confirmmatkhauNV">Mật khẩu xác nhận:</label>
+      <input
+        id="confirmmatkhauNV"
+        type="password"
+        class="form-control"
+        v-model="nhanvienLocal.confirmmatkhauNV"
+        placeholder="Nhập mật khẩu xác nhận"
+        required
+      />
+    </div>
+    <div class="radio-group">
+      <label>
+        <input
+          type="radio"
+          value="quanly"
+          v-model="nhanvienLocal.chucvuNV"
+        />
+        Quản lý
+      </label>
+      <label>
+        <input
+          type="radio"
+          value="nhanvien"
+          v-model="nhanvienLocal.chucvuNV"
+        />
+        Nhân viên
+      </label>
+    </div>
+    <div class="button-group">
+      <button type="submit" class="btn btn-success">Lưu</button>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        @click="$emit('cancel')">
+        Hủy
+      </button>
+    </div>
+  </form>
+</template>
+
+<script>
+  export default {
+    props: {
+      nhanvien: {
+        type: Object,
+        default: () => ({
+          tenNV: '',
+          dienthoaiNV: '',
+          matkhauNV: '',
+          confirmmatkhauNV: '',
+          chucvuNV: ''
+        })
+      }
+    },
+    data() {
+      return {
+        nhanvienLocal: { ...this.nhanvien },
+        hasChanged: false
+      }
+    },
+    watch: {
+      nhanvienLocal: {
+        handler() {
+          this.hasChanged = true
+        },
+        deep: true
+      }
+    },
+    methods: {
+      SubmitForm() {
+        if (!this.hasChanged) {
+          alert('Không có thay đổi nào để lưu!')
+          return
+        }
+        const { tenNV, dienthoaiNV, matkhauNV, confirmmatkhauNV, chucvuNV } = this.nhanvienLocal
+        if (!tenNV.trim()) {
+          alert('Họ tên nhân viên không được để trống!')
+          return
+        }
+        if (!dienthoaiNV.trim()) {
+          alert('Số điện thoại không được để trống!')
+          return
+        }
+        if (!chucvuNV.trim()) {
+          alert('Chức vụ không được để trống!')
+          return
+        }
+        if (!dienthoaiNV.trim()) {
+          alert('Số điện thoại không được để trống!')
+          return
+        }
+        if (!matkhauNV.trim()) {
+          alert('Mật khẩu không được để trống!')
+          return
+        }
+        if (!confirmmatkhauNV.trim()) {
+          alert('Mật khẩu không được để trống!')
+          return
+        }
+        this.$emit('submit', this.nhanvienLocal)
+        this.hasChanged = false
+        //alert('Thông tin nhân viên đã được lưu!')
+      }
+    }
+  }
+</script>

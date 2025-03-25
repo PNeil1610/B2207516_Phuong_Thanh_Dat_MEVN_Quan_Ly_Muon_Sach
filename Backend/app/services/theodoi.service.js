@@ -4,15 +4,15 @@ class TheodoiService {
     constructor(client) {
         this.Theodoi = client.db().collection('theodoi');
     }
+
     extractTheodoiData(payload) {
         const theodoi = {
             maSach: payload.maSach,
             maDG: payload.maDG,
-            ngaymuon: payload.ngaymuon,
-            trangthai: payload.trangthai,
-            ngaytra: payload.ngaytra,
+            ngaymuon: payload.ngaymuon || null,
+            trangthai: payload.trangthai || "Chờ duyệt",
+            ngaytra: payload.ngaytra || null,
         };
-        // remove undefined fields
         Object.keys(theodoi).forEach(
             (key) => theodoi[key] === undefined && delete theodoi[key]
         );
@@ -20,90 +20,122 @@ class TheodoiService {
     }
 
     async create(payload) {
-        
         const theodoi = this.extractTheodoiData(payload);
-        
         const result = await this.Theodoi.findOneAndUpdate(
-            theodoi,
-            { $set: theodoi},
+            { maSach: theodoi.maSach, maDG: theodoi.maDG },
+            { $set: theodoi },
             { returnDocument: 'after', upsert: true }
-            );
+        );
         return result;
     }
 
-
-    async find (filter) {
-        const cursor = this.Theodoi.find(filter);
-        return await cursor.toArray();
+    async find(filter) {
+        return await this.Theodoi.find(filter).toArray();
     }
 
     async findByMaDG(ma) {
-        return await this.find({
-            maDG: {$regex: new RegExp(new RegExp(ma)), $options: 'i'}
-        });
+        return await this.find({ maDG: new RegExp(ma, 'i') });
     }
 
     async findByMaSach(ma) {
-        return await this.find({
-            maSach: {$regex: new RegExp(new RegExp(ma)), $options: 'i'}
-        });
+        return await this.find({ maSach: new RegExp(ma, 'i') });
     }
 
     async findByTrangthai(tt) {
-        return await this.find({
-            trangthai: {$regex: new RegExp(new RegExp(tt)), $options: 'i'}
-        });
-    }
-
-    async findByNgayMuon(ngay) {
-        return await this.find({
-            ngaymuon: {$regex: new RegExp(new RegExp(ngay)), $options: 'i'}
-        });
+        return await this.find({ trangthai: new RegExp(tt, 'i') });
     }
 
     async findById(id) {
         if (!ObjectId.isValid(id)) {
             throw new Error('Invalid ObjectId');
         }
-        
-        try {
-            const theodoi = await this.Theodoi.findOne({
-                _id: new ObjectId(id),
-            });
-            if (!theodoi) {
-                console.error('Không tìm thấy thông tin với:', id);
-                throw new Error('Không tìm thấy thông tin với id');
-            }
-            return theodoi;
-        } catch (error) {
-            console.error('Có lỗi xảy ra khi tìm thông tin:', error);
-            throw error;
-        }
+        return await this.Theodoi.findOne({ _id: new ObjectId(id) });
     }
 
     async update(id, payload) {
-        const filter = {
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-        };    
+        if (!ObjectId.isValid(id)) {
+            throw new Error("Invalid ObjectId");
+        }
         const update = this.extractTheodoiData(payload);
         const result = await this.Theodoi.findOneAndUpdate(
-            filter,
+            { _id: new ObjectId(id) },
             { $set: update },
             { returnDocument: 'after' }
         );
-        return result.updatedExisting;
-    }
-
-    async delete(id) {
-        const result = await this.Theodoi.findOneAndDelete({
-            _id: ObjectId.isValid(id) ? new ObjectId(id) : null,
-        });
         return result;
     }
 
-    async deleteAll (){
-        const result = await this.Theodoi.deleteMany({});
-        return result.deletedCount;
+    async delete(id) {
+        if (!ObjectId.isValid(id)) {
+            throw new Error("Invalid ObjectId");
+        }
+        return await this.Theodoi.findOneAndDelete({ _id: new ObjectId(id) });
+    }
+
+    async deleteAll() {
+        return await this.Theodoi.deleteMany({});
+    }
+
+    /** Yêu cầu mượn sách
+     * Độc giả có thể mượn tối đa 2 quyển sách khác nhau
+     */
+    // async requestMuonSach(maDG, maSach) {
+    //     // Đếm số sách mà độc giả đang mượn hoặc đang chờ duyệt
+    //     const existingLoans = await this.Theodoi.find({
+    //         maDG: maDG,
+    //         trangthai: { $in: ["Đã mượn", "Chờ duyệt"] },
+    //     }).toArray();
+
+    //     if (existingLoans.length >= 2) {
+    //         throw new Error("Bạn đã mượn tối đa 2 quyển sách, không thể mượn thêm.");
+    //     }
+
+    //     // Kiểm tra xem độc giả đã yêu cầu mượn cùng một quyển sách chưa
+    //     const alreadyRequested = existingLoans.some(loan => loan.maSach === maSach);
+    //     if (alreadyRequested) {
+    //         throw new Error("Bạn đã yêu cầu mượn quyển sách này rồi.");
+    //     }
+
+    //     // Tạo yêu cầu mượn sách mới
+    //     const newLoan = {
+    //         maSach,
+    //         maDG,
+    //         ngaymuon: null,
+    //         trangthai: "Chờ duyệt",
+    //         ngaytra: null,
+    //     };
+
+    //     const result = await this.Theodoi.insertOne(newLoan);
+    //     return { message: "Yêu cầu mượn sách đã được gửi", request: result };
+    // }
+
+    /* Nhân viên duyệt yêu cầu mượn sách
+     */
+    async approveMuonSach(id) {
+        if (!ObjectId.isValid(id)) {
+            throw new Error("Invalid ObjectId");
+        }
+
+        const loan = await this.Theodoi.findOne({ _id: new ObjectId(id) });
+        if (!loan) {
+            throw new Error("Không tìm thấy yêu cầu mượn sách.");
+        }
+        if (loan.trangthai !== "Chờ duyệt") {
+            throw new Error("Chỉ có thể duyệt các yêu cầu có trạng thái 'Chờ duyệt'.");
+        }
+
+        // Cập nhật trạng thái thành "Đã mượn" và thêm ngày mượn thực tế
+        const result = await this.Theodoi.findOneAndUpdate(
+            { _id: new ObjectId(id) },
+            {
+                $set: {
+                    trangthai: "Đã mượn",
+                    ngaymuon: new Date().toISOString(),
+                },
+            },
+            { returnDocument: 'after' }
+        );
+        return { message: "Yêu cầu mượn sách đã được duyệt", loan: result };
     }
 }
 

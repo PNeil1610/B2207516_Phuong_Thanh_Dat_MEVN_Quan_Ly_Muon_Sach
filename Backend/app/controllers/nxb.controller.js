@@ -8,9 +8,9 @@ exports.create = async (req, res, next) => {
         return next(new ApiError(400, 'Tên không được bỏ trống'));
     }
 
-    if (!req.body?._id){
-        return next(new ApiError(400, 'Mã nhà xuất bản không được bỏ trống'));
-    }
+    // if (!req.body?._id){
+    //     return next(new ApiError(400, 'Mã nhà xuất bản không được bỏ trống'));
+    // }
 
     try {
         const nxbService = new NXBService(MongoDB.client);        

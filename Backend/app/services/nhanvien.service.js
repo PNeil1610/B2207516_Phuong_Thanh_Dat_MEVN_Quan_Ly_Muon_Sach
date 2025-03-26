@@ -144,10 +144,8 @@ class NhanvienService {
 
             const hashedPassword = bcrypt.hashSync(data.matkhauNV, 10);
             const count = await this.Nhanvien.countDocuments();
-            const maNhanVien = `NV${String(count + 1).padStart(3, '0')}`;
             const newNhanVien = {
                 _id: new ObjectId(),
-                maNV: maNhanVien,
                 tenNV: data.tenNV || 'Chưa cập nhật',
                 chucvuNV: data.chucvuNV || 'Chưa cập nhật',
                 diachi: data.diachi || 'Chưa cập nhật',

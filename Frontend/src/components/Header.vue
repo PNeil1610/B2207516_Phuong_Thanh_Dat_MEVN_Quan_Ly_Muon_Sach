@@ -1,72 +1,74 @@
 <style scoped>
-  .navbar {
-    background: #e7dfd9 !important;
-    padding: 12px 20px;
-    border-bottom: 3px solid #b89e25;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
+    .navbar {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      padding: 15px 25px;
+      border-bottom: 4px solid #b89e25;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
 
-  .navbar-brand {
-    font-size: 20px;
-    font-weight: 700;
-    color: #5a4631 !important;
-    transition: color 0.3s ease;
-  }
+    .navbar-brand {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f1c40f !important;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
 
-  .navbar-brand:hover {
-    color: #8e5b5b !important;
-  }
-
-  .navbar-nav .nav-link {
-    font-size: 16px;
-    font-weight: 500;
-    color: #484f0d !important;
-    margin: 0 10px;
-    transition: color 0.3s ease, transform 0.2s ease;
-    padding: 10px 15px;
-    border-radius: 5px;
-  }
-
-  .navbar-nav .nav-link:hover {
-    background: #b89e25;
-    color: #fff !important;
-    transform: scale(1.05);
-  }
-
-  .navbar-nav .nav-link[to='/logout'] {
-    background: #5a4631;
-    color: #fff !important;
-    border-radius: 5px;
-    padding: 10px 15px;
-  }
-
-  .navbar-nav .nav-link[to='/logout']:hover {
-    background: #3e3224;
-    transform: scale(1.05);
-  }
-
-  .navbar-toggler {
-    border: none;
-    outline: none;
-  }
-
-  .navbar-toggler:focus {
-    box-shadow: none;
-  }
-
-  @media (max-width: 992px) {
-    .navbar-nav {
-      text-align: center;
-      padding-top: 10px;
+    .navbar-brand:hover {
+      color: #e74c3c !important;
+      transform: scale(1.1);
     }
 
     .navbar-nav .nav-link {
-      display: block;
-      margin-bottom: 10px;
-      padding: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #ecf0f1 !important;
+      margin: 0 12px;
+      transition: all 0.3s ease;
+      padding: 12px 18px;
+      border-radius: 6px;
     }
-  }
-</style>
+
+    .navbar-nav .nav-link:hover {
+      background: rgba(255, 215, 0, 0.8);
+      color: #2c3e50 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 215, 0, 0.5);
+    }
+
+    .navbar-nav .nav-link[to='/logout'] {
+      background: #c0392b;
+      color: #fff !important;
+      border-radius: 6px;
+      padding: 12px 18px;
+    }
+
+    .navbar-nav .nav-link[to='/logout']:hover {
+      background: #a93226;
+      transform: translateY(-2px);
+    }
+
+    .navbar-toggler {
+      border: none;
+      outline: none;
+    }
+
+    .navbar-toggler:focus {
+      box-shadow: none;
+    }
+
+    @media (max-width: 992px) {
+      .navbar-nav {
+        text-align: center;
+        padding-top: 12px;
+      }
+
+      .navbar-nav .nav-link {
+        display: block;
+        margin-bottom: 12px;
+        padding: 12px;
+      }
+    }
+  </style>
 
 <script>
   export default {

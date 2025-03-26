@@ -1,6 +1,6 @@
 <style scoped>
   .footer {
-    background-color: #b0c415;
+    background-color: #ddd;
     padding: 20px 0;
     border-top: 2px solid #ddd;
     font-size: 13pt;

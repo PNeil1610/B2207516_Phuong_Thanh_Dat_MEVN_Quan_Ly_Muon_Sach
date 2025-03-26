@@ -86,20 +86,21 @@
           alert('Đăng nhập độc giả thành công')
           this.$router.push('/')
         } catch (error) {
-          if (error.response) {
-            if (
-              error.response.status === 404 ||
-              error.response.status === 500
-            ) {
-              alert('Số điện thoại chưa được đăng ký!')
-            } else if (error.response.status === 401) {
-              alert('Mật khẩu không đúng!')
-            } else {
-              alert('Lỗi hệ thống, vui lòng thử lại!')
-            }
-          } else {
-            alert('Không thể kết nối đến máy chủ!')
-          }
+          alert('Đăng nhập thất bại do sai số điện thoại hoặc mật khẩu!')
+          // if (error.response) {
+          //   if (
+          //     error.response.status === 404 ||
+          //     error.response.status === 500
+          //   ) {
+          //     alert('Số điện thoại chưa được đăng ký!')
+          //   } else if (error.response.status === 401) {
+          //     alert('Mật khẩu không đúng!')
+          //   } else {
+          //     alert('Lỗi hệ thống, vui lòng thử lại!')
+          //   }
+          // } else {
+          //   alert('Không thể kết nối đến máy chủ!')
+          // }
         }
       }
     }

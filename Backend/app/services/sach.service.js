@@ -14,7 +14,7 @@ class SachService {
             dongiaSach: payload.dongiaSach,
             namXB: payload.namXB,
             maNXB: payload.maNXB,
-            tenNXB: payload.tenNXB,
+            // tenNXB: payload.tenNXB,
             tacgia: payload.tacgia,
         };
         Object.keys(sach).forEach(

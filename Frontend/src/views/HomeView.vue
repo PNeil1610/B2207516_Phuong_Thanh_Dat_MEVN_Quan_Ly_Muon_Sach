@@ -97,16 +97,15 @@
       filteredBooks() {
         return this.sachList.filter(book => {
           const keyword = this.search.toLowerCase().trim()
-          const manxbValue = book.MANXB?._id || book.MANXB?.MANXB || ''
-
+          const manxbValue = book.maNXB ||''
           // Tìm NXB trong danh sách nxbs
           const nxb = this.nxbs.find(n => String(n._id) === String(manxbValue))
-          const tenNXB = nxb ? nxb.TENNXB.toLowerCase() : ''
+          const tenNXB = nxb ? nxb.tenNXB.toLowerCase() : ''
           return (
-            book.TENSACH?.toLowerCase().includes(keyword) ||
-            book.MASACH?.toLowerCase().includes(keyword) ||
-            book.NGUONGOC_TACGIA?.toLowerCase().includes(keyword) ||
-            (String(book.NAMXUATBAN) || '').toLowerCase().includes(keyword) ||
+            book.tenSach?.toLowerCase().includes(keyword) ||
+            book.maSach?.toLowerCase().includes(keyword) ||
+            book.tacgia?.toLowerCase().includes(keyword) ||
+            (String(book.namXB) || '').toLowerCase().includes(keyword) ||
             tenNXB.includes(keyword)
           )
         })

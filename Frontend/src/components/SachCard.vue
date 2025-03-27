@@ -100,12 +100,10 @@ export default {
     getNXBName(book) {
       if (!book) return "Chưa có NXB";
 
-      const manxb = typeof book.maNXB === "object" ? book.maNXB.maNXB : book.maNXB; 
-          
       const nxb = this.nxbs.find(n => 
-          n.maNXB === manxb || 
-          n._id === manxb || 
-          String(n._id) === String(manxb) 
+          n.maNXB === book || 
+          n._id === book || 
+          String(n._id) === String(book) 
       );
       return nxb ? nxb.tenNXB : "Không tìm thấy";
     },

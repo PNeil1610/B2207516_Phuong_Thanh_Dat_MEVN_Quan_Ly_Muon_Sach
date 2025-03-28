@@ -183,7 +183,7 @@
             gioitinh: userData.gioitinhDG || '',
             chucvu:
               this.userRole === 'docgia'
-                ? 'Đọc giả'
+                ? 'Độc giả'
                 : userData.chucvuNV === 'quanly'
                 ? 'Quản lý'
                 : 'Nhân viên',

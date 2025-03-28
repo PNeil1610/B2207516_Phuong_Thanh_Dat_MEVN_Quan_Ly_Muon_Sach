@@ -109,12 +109,6 @@ li button {
           {{ book.tenSach }} (Còn: {{ book.soquyenSach}})
         </option>
       </select>
-
-      <!-- <label for="quantity">Số lượng mượn:</label>
-      <input type="number" v-model.number="quantity" :max="selectedBook ? selectedBook.soquyenSach : 1" min="1" /> -->
-      <!-- <button class="btn btn-secondary" @click="showBorrowForm = false">
-        Hủy
-      </button> -->
       <button class="btn btn-add" @click="registerBorrow">Đăng Ký Mượn</button>
       <button @click="cancelBorrow" class="btn-cancel">Hủy Phiếu Mượn</button>
     </div>

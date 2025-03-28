@@ -77,21 +77,7 @@ export default {
         console.error("Lỗi khi xác nhận trả:", error);
       }
     },
-    // async xoaDonMuon(don) {
-    //     if (!confirm("Bạn có chắc chắn muốn xóa yêu cầu này?")) return;
-
-    //     try {
-    //       await axios.delete(`http://localhost:3000/api/theodoi/${don._id}`);
-    //       this.danhSachDonMuon = this.danhSachDonMuon.filter(item => item._id !== don._id);
-    //       alert("Xóa thành công!");
-    //     } catch (error) {
-    //     console.error("Lỗi khi xóa yêu cầu:", error);
-    //     if (error.response) {
-    //       console.error("Chi tiết lỗi:", error.response.data);
-    //     }
-    //     alert("Xóa không thành công!");
-    //     }
-    // },
+    
     async xoaDonMuon(don) {
       if (!confirm("Bạn có chắc chắn muốn xóa yêu cầu này?")) return;
 

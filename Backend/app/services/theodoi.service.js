@@ -76,39 +76,7 @@ class TheodoiService {
         return await this.Theodoi.deleteMany({});
     }
 
-    /** Yêu cầu mượn sách
-     * Độc giả có thể mượn tối đa 2 quyển sách khác nhau
-     */
-    // async requestMuonSach(maDG, maSach) {
-    //     // Đếm số sách mà độc giả đang mượn hoặc đang chờ duyệt
-    //     const existingLoans = await this.Theodoi.find({
-    //         maDG: maDG,
-    //         trangthai: { $in: ["Đã mượn", "Chờ duyệt"] },
-    //     }).toArray();
-
-    //     if (existingLoans.length >= 2) {
-    //         throw new Error("Bạn đã mượn tối đa 2 quyển sách, không thể mượn thêm.");
-    //     }
-
-    //     // Kiểm tra xem độc giả đã yêu cầu mượn cùng một quyển sách chưa
-    //     const alreadyRequested = existingLoans.some(loan => loan.maSach === maSach);
-    //     if (alreadyRequested) {
-    //         throw new Error("Bạn đã yêu cầu mượn quyển sách này rồi.");
-    //     }
-
-    //     // Tạo yêu cầu mượn sách mới
-    //     const newLoan = {
-    //         maSach,
-    //         maDG,
-    //         ngaymuon: null,
-    //         trangthai: "Chờ duyệt",
-    //         ngaytra: null,
-    //     };
-
-    //     const result = await this.Theodoi.insertOne(newLoan);
-    //     return { message: "Yêu cầu mượn sách đã được gửi", request: result };
-    // }
-
+    
     /* Nhân viên duyệt yêu cầu mượn sách
      */
     async approveMuonSach(id) {
